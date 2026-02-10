@@ -18,7 +18,7 @@ const severityConfig = {
   },
   moderate: {
     icon: AlertCircle,
-    bgClass: 'bg-accent/10',
+    bgClass: 'bg-accent/20',
     borderClass: 'border-accent/30',
     iconClass: 'text-accent',
   },
@@ -37,7 +37,6 @@ const severityConfig = {
 };
 
 export const WeatherAlerts = ({ alerts, selectedCities, onDismiss }: WeatherAlertsProps) => {
-  console.log(alerts);
   
   const relevantAlerts = alerts.filter((alert) =>
     alert.cities.some((city) => selectedCities.includes(city))

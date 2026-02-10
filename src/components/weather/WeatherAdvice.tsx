@@ -20,9 +20,28 @@ interface WeatherAdviceProps {
 const getAdviceForWeather = (weather: WeatherData[]): WeatherAdviceType[] => {
   const advice: WeatherAdviceType[] = [];
   
-  const hasRain = weather.some(w => w.condition === 'rainy' || w.condition === 'stormy');
-  const hasSunny = weather.some(w => w.condition === 'sunny');
-  const hasSnow = weather.some(w => w.condition === 'snowy');
+  const hasRain = weather.some(w => w.condition === 'rain' || w.condition === 'drizzle' || w.condition === 'thunderstorm' || w.condition === 'sleet');
+  const hasSunny = weather.some(w => w.condition === 'clear');
+  const hasSnow = weather.some(w => w.condition === 'snow' || w.condition === 'sleet');
+  const hasClouds = weather.some(
+  w => w.condition === 'clouds'
+);
+
+const hasFoggyConditions = weather.some(
+  w =>
+    w.condition === 'fog' ||
+    w.condition === 'mist' ||
+    w.condition === 'haze'
+);
+
+const hasPoorAirQuality = weather.some(
+  w =>
+    w.condition === 'smoke' ||
+    w.condition === 'dust' ||
+    w.condition === 'sand' ||
+    w.condition === 'ash'
+);
+
   const highTemp = Math.max(...weather.map(w => w.temperature));
   const lowTemp = Math.min(...weather.map(w => w.temperature));
   const highUV = Math.max(...weather.map(w => w.uvIndex));
@@ -101,15 +120,34 @@ const getAdviceForWeather = (weather: WeatherData[]): WeatherAdviceType[] => {
     });
   }
 
-  // Default advice if nothing specific
-  if (advice.length === 0) {
-    advice.push({
-      icon: 'alert',
-      title: 'Moderate Conditions',
-      description: 'Weather looks comfortable. A light jacket may be useful for cooler moments.',
-      priority: 'low',
-    });
-  }
+  if (hasClouds && !hasRain && !hasSnow) {
+  advice.push({
+    icon: 'cloud',
+    title: 'Overcast Skies',
+    description: 'Cloudy conditions expected. It may feel cooler and less sunny than usual.',
+    priority: 'low',
+  });
+}
+
+if (hasFoggyConditions) {
+  advice.push({
+    icon: 'alert-triangle',
+    title: 'Reduced Visibility',
+    description:
+      'Foggy or hazy conditions may reduce visibility. Drive carefully and use fog lights if needed.',
+    priority: 'medium',
+  });
+}
+
+if (hasPoorAirQuality) {
+  advice.push({
+    icon: 'mask',
+    title: 'Poor Air Quality',
+    description:
+      'Air quality may be poor due to smoke or dust. Limit outdoor activities and consider wearing a mask.',
+    priority: 'high',
+  });
+}
 
   return advice.sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -130,9 +168,9 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const priorityColors = {
-  high: 'bg-destructive/10 border-destructive/20 text-destructive',
-  medium: 'bg-accent/10 border-accent/20 text-accent',
-  low: 'bg-primary/10 border-primary/20 text-primary',
+  high: 'bg-destructive/20 border-destructive/20 text-destructive',
+  medium: 'bg-accent/20 border-accent/20 text-accent',
+  low: 'bg-primary/20 border-primary/20 text-primary',
 };
 
 export const WeatherAdvice = ({ weatherData }: WeatherAdviceProps) => {

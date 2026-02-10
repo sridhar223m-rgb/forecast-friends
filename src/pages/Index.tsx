@@ -6,7 +6,6 @@ import { CitySearch } from "@/components/weather/CitySearch";
 import { WeatherAlerts } from "@/components/weather/WeatherAlerts";
 import { WeatherAdvice } from "@/components/weather/WeatherAdvice";
 import { WeatherComparison } from "@/components/weather/WeatherComparison";
-import { mockCities, mockAlerts } from "@/data/mockWeather";
 import { City, WeatherData } from "@/types/weather";
 import {
   fetchWeatherAlerts,
@@ -15,17 +14,23 @@ import {
 import { getCurrentLocation } from "@/utils/geoLocation";
 import { getCityFromCoords } from "@/services/cityService";
 import { mapToWeatherAlerts, mapToWeatherData } from "@/utils/mapWeather";
-import { AppBackground } from "@/components/AppBackground";
+import backgroundVideo from "@/assests/video/Video.mp4";
 
 const Index = () => {
-  const [alerts, setAlerts] = useState(mockAlerts);
+  const [alerts, setAlerts] = useState([]);
   const [selectedCities, setSelectedCities] = useState<City[]>([]);
+  const [weather, setWeather] = useState<WeatherData[]>([]);
+  const [loading, setLoading] = useState(true);
 
+
+  const [query, setQuery] = useState("");
   const handleAddCity = async (city: City) => {
-    setSelectedCities((prev) => [...prev, city]);
+    const res = await fetchWeatherByCoords(city.lat, city.lon);
+    const weatherData = mapToWeatherData(res);
+    
 
-    const weatherRes = await fetchWeatherByCoords(city.lat, city.lon);
-    setWeather((prev) => [...prev, mapToWeatherData(weatherRes)]);
+    setSelectedCities((prev) => [...prev, city]);
+    setWeather((prev) => [...prev, { ...weatherData, id: city.id }]);
   };
 
   const handleRemoveCity = (id: string) => {
@@ -37,12 +42,6 @@ const Index = () => {
     setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
   };
 
-  const [weather, setWeather] = useState<WeatherData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // if (loading) return <p>Loading...</p>;
-
-  const [query, setQuery] = useState("");
 
   const selectedCityNames = selectedCities.map((city) => city.name);
 
@@ -56,8 +55,10 @@ const Index = () => {
         const lon = longitude;
 
         const cityData = await getCityFromCoords(lat, lon);
-
-        const city: City = {
+        const weatherRes = await fetchWeatherByCoords(lat, lon);
+        const weatherData = mapToWeatherData(weatherRes);
+        
+        const city: City = {...weatherData,
           id: `${lat}-${lon}`,
           name: cityData.name,
           country: cityData.country,
@@ -66,15 +67,11 @@ const Index = () => {
         };
 
         setSelectedCities([city]);
-
-        const weatherRes = await fetchWeatherByCoords(lat, lon);
-        const weatherData = mapToWeatherData(weatherRes);
-        weatherData.isCurrentLocation = true;
-
-        setWeather([weatherData]);
-
+        setWeather([{ ...weatherData, id: city.id, isCurrentLocation: true }]);       
         const alertsRes = await fetchWeatherAlerts(lat, lon);
         setAlerts(mapToWeatherAlerts(alertsRes.alerts));
+        setLoading(false);
+
       } catch (e) {
         console.error(e);
       } finally {
@@ -84,28 +81,23 @@ const Index = () => {
 
     init();
   }, []);
-
+  if (loading) return null;
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5"
-      style={{
-        backgroundImage:
-          "url(https://media.istockphoto.com/id/108329641/photo/cold-day-in-chicago.jpg?s=612x612&w=0&k=20&c=qDG1bKanlQG8bMZ3XdmPA3gDwOFDg-T9Kuuc14ue-FM=)",
-        backgroundSize: "cover", // Make sure it covers the entire area
-        backgroundPosition: "center", // Center the image
-        backgroundRepeat: "no-repeat", // Prevent tiling
-      }}
-    >
-      {/* Decorative background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-      </div>
+    <div className="min-h-screen relative">
+      {/* Background Video */}
+      <video 
+        autoPlay 
+        muted 
+        loop 
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
+      >
+        <source src={backgroundVideo} type="video/mp4" />
+      </video>
 
        {/* <div className="fixed inset-0 -z-10 bg-white/30 backdrop-blur-lg" /> */}
       <div className="relative z-10">
         {/* Header */}
-        <header className="border-b border-border/50 backdrop-blur-md bg-background/80 sticky top-0 z-50">
+        <header className="border-b border-gray-300 border-border/50 backdrop-blur-md bg-background/10 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <motion.div
@@ -191,7 +183,7 @@ const Index = () => {
                       weather={city}
                       // onRemove={handleRemoveCity}
                       onRemove={
-                        !weather.isCurrentLocation
+                        !weather?.isCurrentLocation
                           ? handleRemoveCity
                           : undefined
                       }
@@ -223,7 +215,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <WeatherComparison cities={selectedCities} />
+              <WeatherComparison cities={weather} />
             </motion.section>
 
             {/* Weather Advice Section */}

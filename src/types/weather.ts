@@ -16,10 +16,17 @@ export interface WeatherData {
   sunrise: string;
   sunset: string;
   isCurrentLocation?: boolean;
-
+  
 }
 
-
+export interface City {
+  id: string;
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  state?: string;
+}
 
 export interface WeatherAlert {
   id: string;
@@ -38,13 +45,6 @@ export interface WeatherAdvice {
   priority: 'low' | 'medium' | 'high';
 }
 
-export interface City {
-  id:string;
-  name: string;
-  country: string;
-  lat: number;
-  lon: number;
-  state?: string;
-}
+
 
 
