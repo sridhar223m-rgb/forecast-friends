@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: [https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID](https://sridhar223m-rgb.github.io/forecast-friends/)
+**URL**: [https://sridhar223m-rgb.github.io/forecast-friends/](https://sridhar223m-rgb.github.io/forecast-friends/)
 
 Follow these steps:
 
