@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  base: '/weather-forecast/', // EXACT repo name
+  base: '/forecast-friends/', // EXACT repo name
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
