@@ -6,6 +6,11 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
+     headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "frame-ancestors 'none';",
+      'X-Frame-Options' :"DENY",
+    },
     host: "::",
     port: 8080,
     hmr: {
